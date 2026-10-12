@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Presensi, Jurnal & Nilai Fisika - MAN Insan Cendekia Bengkulu Tengah</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+            body {
+                background-color: #fff !important;
+                color: #000 !important;
+                font-size: 10pt;
+            }
+            .card-box {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+            }
+        }
+        .print-only {
+            display: none;
+        }
+        /* Custom scrollbar for large tables */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- TOP HEADER -->
+    <header class="bg-emerald-800 text-white shadow-lg no-print">
+        <div class="max-w-7xl mx-mx auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-emerald-700 rounded-lg">
+                    <i class="fa-solid fa-atom text-3xl text-emerald-300"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold leading-tight">MAN Insan Cendekia Bengkulu Tengah</h1>
+                    <p class="text-xs text-emerald-200">Perangkat Administrasi Guru Fisika — T.A. 2025/2026 (1 Tahun) | <strong>Guru: Yudi Maulana, M.Pd.</strong></p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="saveDataToLocal()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 rounded-md text-xs font-semibold flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Data
+                </button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-md text-xs font-bold flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-print"></i> Cetak / Export PDF
+                </button>
+                <button onclick="resetToDefaultData()" class="px-3 py-1.5 bg-red-700 hover:bg-red-600 rounded-md text-xs font-semibold flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-rotate-right"></i> Reset
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTROL PANEL / FILTER BAR -->
+    <section class="bg-white border-b border-slate-200 shadow-sm no-print sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+            <!-- Selector Class & Semester -->
+            <div class="flex flex-wrap items-center gap-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Pilih Kelas</label>
+                    <select id="classSelector" onchange="switchClass(this.value)" class="bg-slate-100 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block px-3 py-1.5 font-bold">
+                        <optgroup label="Kelas X">
+                            <option value="X1">Kelas X1 (24 Siswa)</option>
+                            <option value="X2">Kelas X2 (23 Siswa)</option>
+                            <option value="X3">Kelas X3 (24 Siswa)</option>
+                            <option value="X4">Kelas X4 (24 Siswa)</option>
+                            <option value="X5">Kelas X5 (22 Siswa)</option>
+                        </optgroup>
+                        <optgroup label="Kelas XII">
+                            <option value="XII1">Kelas XII 1 (15 Siswa)</option>
+                            <option value="XII2">Kelas XII 2 (14 Siswa)</option>
+                            <option value="XII3">Kelas XII 3 (15 Siswa)</option>
+                            <option value="XII4">Kelas XII 4 (13 Siswa)</option>
+                            <option value="XII5">Kelas XII 5 (16 Siswa)</option>
+                            <option value="XII6">Kelas XII 6 (14 Siswa)</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Semester</label>
+                    <select id="semesterSelector" onchange="switchSemester(this.value)" class="bg-slate-100 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block px-3 py-1.5 font-bold">
+                        <option value="Ganjil">Semester Ganjil (Juli - Des 2025)</option>
+                        <option value="Genap">Semester Genap (Jan - Juni 2026)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
+                <button id="tab-absen" onclick="switchTab('absen')" class="px-4 py-1.5 rounded-md text-xs font-bold transition text-emerald-800 bg-white shadow-sm">
+                    <i class="fa-solid fa-calendar-check mr-1.5"></i> Presensi (Absens)
+                </button>
+                <button id="tab-jurnal" onclick="switchTab('jurnal')" class="px-4 py-1.5 rounded-md text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                    <i class="fa-solid fa-book-bookmark mr-1.5"></i> Jurnal Mengajar
+                </button>
+                <button id="tab-nilai" onclick="switchTab('nilai')" class="px-4 py-1.5 rounded-md text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                    <i class="fa-solid fa-graduation-cap mr-1.5"></i> Daftar Nilai
+                </button>
+                <button id="tab-materi" onclick="switchTab('materi')" class="px-4 py-1.5 rounded-md text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                    <i class="fa-solid fa-list-check mr-1.5"></i> Silabus Materi
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRINT HEADER (Only shows when printing) -->
+    <div class="print-only max-w-7xl mx-auto p-4 mb-4 border-b-2 border-black">
+        <div class="text-center">
+            <h2 class="text-lg font-bold uppercase tracking-wide">KEMENTERIAN AGAMA REPUBLIK INDONESIA</h2>
+            <h1 class="text-xl font-extrabold uppercase">MAN INSAN CENDEKIA BENGKULU TENGAH</h1>
+            <p class="text-xs">Jl. Lintas Bengkulu - Kepahiang KM 18, Renah Lebar, Kab. Bengkulu Tengah</p>
+            <div class="mt-3 pt-2 border-t border-slate-400 flex justify-between text-xs font-semibold">
+                <span>MATA PELAJARAN: FISIKA</span>
+                <span id="print-class-info">KELAS: X1</span>
+                <span>TAHUN AJARAN: 2025/2026</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- KELAS & MAPEL INFO BAR -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-wrap justify-between items-center gap-4 no-print">
+            <div class="flex items-center gap-4">
+                <div id="class-badge" class="w-12 h-12 bg-emerald-100 text-emerald-800 font-black text-xl rounded-xl flex items-center justify-center border border-emerald-200">
+                    X1
+                </div>
+                <div>
+                    <h2 id="class-title" class="text-lg font-bold text-slate-900">Kelas X1 — Fisika</h2>
+                    <p id="teacher-info-bar" class="text-xs font-semibold text-emerald-800"><i class="fa-solid fa-user-tie mr-1"></i> Guru Pengampu: Yudi Maulana, M.Pd.</p>
+                    <p id="materi-summary" class="text-xs text-slate-500 mt-0.5">Materi Aktif: Besaran & Satuan, Jangka Sorong, Mikrometer Sekrup, Vektor, Energi Terbarukan</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-6 text-xs">
+                <div class="text-center">
+                    <span class="block text-slate-400 font-medium">Jumlah Siswa</span>
+                    <span id="stat-siswa" class="text-base font-bold text-slate-800">24</span>
+                </div>
+                <div class="h-8 w-px bg-slate-200"></div>
+                <div class="text-center">
+                    <span class="block text-slate-400 font-medium">Total Pertemuan Efektif</span>
+                    <span id="stat-pertemuan" class="text-base font-bold text-emerald-700">18 Pertemuan</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 1: PRESENSI / ABSENSI -->
+        <section id="view-absen" class="space-y-4">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden card-box">
+                <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center flex-wrap gap-2">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-clipboard-user text-emerald-600"></i> Presensi Kehadiran Siswa
+                        </h3>
+                        <p class="text-xs text-slate-500">Keterangan: <strong class="text-emerald-600">H</strong> = Hadir, <strong class="text-blue-600">S</strong> = Sakit, <strong class="text-amber-600">I</strong> = Izin, <strong class="text-red-600">A</strong> = Alpa</p>
+                    </div>
+                    <div class="no-print flex items-center gap-2">
+                        <button onclick="markAllHadir()" class="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-semibold rounded transition">
+                            <i class="fa-solid fa-check-double mr-1"></i> Set Semua Hadir
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto table-container">
+                    <table class="w-full text-xs text-left border-collapse">
+                        <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                            <tr>
+                                <th class="p-2.5 text-center border-r border-slate-200 w-10">No</th>
+                                <th class="p-2.5 border-r border-slate-200 min-w-[120px]">NISN</th>
+                                <th class="p-2.5 border-r border-slate-200 min-w-[200px]">Nama Lengkap Siswa</th>
+                                <!-- Dynamic Date Headers (P1-P18) -->
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P1</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P2</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P3</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P4</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P5</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P6</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P7</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P8</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P9</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P10</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P11</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P12</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P13</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P14</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P15</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P16</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P17</th>
+                                <th class="p-1 text-center border-r border-slate-200 min-w-[32px]">P18</th>
+                                <!-- Summaries -->
+                                <th class="p-2 text-center border-r border-slate-200 bg-emerald-50 text-emerald-800">H</th>
+                                <th class="p-2 text-center border-r border-slate-200 bg-blue-50 text-blue-800">S</th>
+                                <th class="p-2 text-center border-r border-slate-200 bg-amber-50 text-amber-800">I</th>
+                                <th class="p-2 text-center border-r border-slate-200 bg-red-50 text-red-800">A</th>
+                                <th class="p-2 text-center bg-slate-200">% Hadir</th>
+                            </tr>
+                        </thead>
+                        <tbody id="absen-table-body" class="divide-y divide-slate-200">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- LEMBAR PENGESAHAN AKHIR SEMESTER (ABSENSI) -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 card-box mt-6">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 border-b pb-2 flex justify-between items-center">
+                    <span><i class="fa-solid fa-signature text-emerald-600 mr-1"></i> Pengesahan Laporan Presensi Akhir <span class="semester-label-text">Semester Ganjil</span></span>
+                    <span class="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full"><i class="fa-solid fa-circle-check mr-1"></i> Terverifikasi Digital</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-center text-xs">
+                    <div class="flex flex-col items-center justify-between h-40">
+                        <div>
+                            <p>Mengetahui,</p>
+                            <p class="font-bold text-slate-800">Kepala MAN Insan Cendekia Bengkulu Tengah</p>
+                        </div>
+                        <div class="my-2">
+                            <span class="text-[10px] text-slate-400 italic">[ Ditempel Stempel & TTD Digital ]</span>
+                        </div>
+                        <div>
+                            <p class="font-bold underline text-slate-900">Julita, M.Pd.I</p>
+                            <p class="text-slate-500">NIP. 198401302006042002</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center justify-between h-40">
+                        <div>
+                            <p>Renah Lebar, <span class="semester-end-date">20 Desember 2025</span></p>
+                            <p class="font-bold text-slate-800">Guru Mata Pelajaran Fisika</p>
+                        </div>
+                        <!-- TTD DIGITAL SVG (Yudi Maulana) -->
+                        <div class="my-1">
+                            <svg viewBox="0 0 200 70" class="h-14 mx-auto text-slate-900 fill-none stroke-current" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M 20 58 Q 45 38 75 20 C 85 14 92 30 82 45 Q 76 55 68 60 C 62 65 60 50 75 36 C 88 22 102 32 98 44 C 93 55 105 34 118 38 Q 128 41 122 48 C 117 54 130 38 138 44 Q 143 48 148 38" />
+                                <circle cx="146" cy="20" r="2.5" fill="currentColor" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-bold underline text-slate-900">Yudi Maulana, M.Pd.</p>
+                            <p class="text-slate-500">NIP. 199210122023211013</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 2: JURNAL MENGAJAR -->
+        <section id="view-jurnal" class="space-y-4 hidden">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden card-box">
+                <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-book text-emerald-600"></i> Jurnal Pelaksanaan Pembelajaran Fisika
+                        </h3>
+                        <p class="text-xs text-slate-500">Catatan kronologis kegiatan tatap muka berdasarkan alokasi hari efektif</p>
+                    </div>
+                    <button onclick="addJurnalRow()" class="no-print px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                        <i class="fa-solid fa-plus"></i> Tambah Entry Jurnal
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto table-container">
+                    <table class="w-full text-xs text-left border-collapse">
+                        <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                            <tr>
+                                <th class="p-2.5 text-center border-r border-slate-200 w-12">P.Ke</th>
+                                <th class="p-2.5 border-r border-slate-200 w-28">Hari / Tanggal</th>
+                                <th class="p-2.5 border-r border-slate-200 min-w-[180px]">Materi Pokok / Sub-Materi</th>
+                                <th class="p-2.5 border-r border-slate-200 min-w-[220px]">Tujuan Pembelajaran (TP) & Indikator</th>
+                                <th class="p-2.5 border-r border-slate-200 min-w-[240px]">Aktivitas / Metode Pembelajaran</th>
+                                <th class="p-2.5 border-r border-slate-200 w-24 text-center">Kehadiran Siswa</th>
+                                <th class="p-2.5 border-r border-slate-200 min-w-[140px]">Catatan / Hambatan</th>
+                                <th class="p-2.5 text-center w-12 no-print">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jurnal-table-body" class="divide-y divide-slate-200">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- LEMBAR PENGESAHAN AKHIR SEMESTER (JURNAL) -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 card-box mt-6">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 border-b pb-2 flex justify-between items-center">
+                    <span><i class="fa-solid fa-signature text-emerald-600 mr-1"></i> Pengesahan Jurnal Mengajar Akhir <span class="semester-label-text">Semester Ganjil</span></span>
+                    <span class="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full"><i class="fa-solid fa-circle-check mr-1"></i> Validasi Selesai</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-center text-xs">
+                    <div class="flex flex-col items-center justify-between h-40">
+                        <div>
+                            <p>Mengetahui,</p>
+                            <p class="font-bold text-slate-800">Kepala MAN Insan Cendekia Bengkulu Tengah</p>
+                        </div>
+                        <div class="my-2">
+                            <span class="text-[10px] text-slate-400 italic">[ Verified Document ]</span>
+                        </div>
+                        <div>
+                            <p class="font-bold underline text-slate-900">Julita, M.Pd.I</p>
+                            <p class="text-slate-500">NIP. 198401302006042002</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center justify-between h-40">
+                        <div>
+                            <p>Renah Lebar, <span class="semester-end-date">20 Desember 2025</span></p>
+                            <p class="font-bold text-slate-800">Guru Mata Pelajaran Fisika</p>
+                        </div>
+                        <!-- TTD DIGITAL SVG (Yudi Maulana) -->
+                        <div class="my-1">
+                            <svg viewBox="0 0 200 70" class="h-14 mx-auto text-slate-900 fill-none stroke-current" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M 20 58 Q 45 38 75 20 C 85 14 92 30 82 45 Q 76 55 68 60 C 62 65 60 50 75 36 C 88 22 102 32 98 44 C 93 55 105 34 118 38 Q 128 41 122 48 C 117 54 130 38 138 44 Q 143 48 148 38" />
+                                <circle cx="146" cy="20" r="2.5" fill="currentColor" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-bold underline text-slate-900">Yudi Maulana, M.Pd.</p>
+                            <p class="text-slate-500">NIP. 199210122023211013</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 3: DAFTAR NILAI -->
+        <section id="view-nilai" class="space-y-4 hidden">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden card-box">
+                <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-chart-bar text-emerald-600"></i> Daftar Nilai Asesmen Fisika
+                        </h3>
+                        <p class="text-xs text-slate-500">Nilai Formatif (TP), Sumatif / UH, PTS, dan PAS/PAT</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto table-container">
+                    <table class="w-full text-xs text-left border-collapse">
+                        <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                            <tr>
+                                <th class="p-2 text-center border-r border-slate-200 w-8" rowspan="2">No</th>
+                                <th class="p-2 border-r border-slate-200 min-w-[110px]" rowspan="2">NISN</th>
+                                <th class="p-2 border-r border-slate-200 min-w-[180px]" rowspan="2">Nama Siswa</th>
+                                <th class="p-2 text-center border-b border-r border-slate-200 bg-emerald-50" colspan="4">Formatif (Tujuan Pembelajaran)</th>
+                                <th class="p-2 text-center border-b border-r border-slate-200 bg-blue-50" colspan="3">Sumatif Harian (UH)</th>
+                                <th class="p-2 text-center border-r border-slate-200 bg-amber-50" rowspan="2">PTS</th>
+                                <th class="p-2 text-center border-r border-slate-200 bg-purple-50" rowspan="2">PAS / PAT</th>
+                                <th class="p-2 text-center border-r border-slate-200 bg-slate-800 text-white" rowspan="2">Nilai Akhir (NA)</th>
+                                <th class="p-2 text-center border-r border-slate-200" rowspan="2">Predikat</th>
+                                <th class="p-2 text-center" rowspan="2">Keterangan</th>
+                            </tr>
+                            <tr class="bg-slate-100 text-slate-600 border-b border-slate-200">
+                                <th class="p-1.5 text-center border-r border-slate-200 w-12">TP 1</th>
+                                <th class="p-1.5 text-center border-r border-slate-200 w-12">TP 2</th>
+                                <th class="p-1.5 text-center border-r border-slate-200 w-12">TP 3</th>
+                                <th class="p-1.5 text-center border-r border-slate-200 w-12">TP 4</th>
+                                <th class="p-1.5 text-center border-r border-slate-200 w-12">UH 1</th>
+                                <th class="p-1.5 text-center border-r border-slate-200 w-12">UH 2</th>
+                                <th class="p-1.5 text-center border-r border-slate-200 w-12">UH 3</th>
+                            </tr>
+                        </thead>
+                        <tbody id="nilai-table-body" class="divide-y divide-slate-200">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- LEMBAR PENGESAHAN AKHIR SEMESTER (NILAI) -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 card-box mt-6">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 border-b pb-2 flex justify-between items-center">
+                    <span><i class="fa-solid fa-signature text-emerald-600 mr-1"></i> Pengesahan Rekapitulasi Nilai Akhir <span class="semester-label-text">Semester Ganjil</span></span>
+                    <span class="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full"><i class="fa-solid fa-circle-check mr-1"></i> Sah / Final</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-center text-xs">
+                    <div class="flex flex-col items-center justify-between h-40">
+                        <div>
+                            <p>Mengetahui,</p>
+                            <p class="font-bold text-slate-800">Kepala MAN Insan Cendekia Bengkulu Tengah</p>
+                        </div>
+                        <div class="my-2">
+                            <span class="text-[10px] text-slate-400 italic">[ Legalisir Kurikulum ]</span>
+                        </div>
+                        <div>
+                            <p class="font-bold underline text-slate-900">Julita, M.Pd.I</p>
+                            <p class="text-slate-500">NIP. 198401302006042002</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center justify-between h-40">
+                        <div>
+                            <p>Renah Lebar, <span class="semester-end-date">20 Desember 2025</span></p>
+                            <p class="font-bold text-slate-800">Guru Mata Pelajaran Fisika</p>
+                        </div>
+                        <!-- TTD DIGITAL SVG (Yudi Maulana) -->
+                        <div class="my-1">
+                            <svg viewBox="0 0 200 70" class="h-14 mx-auto text-slate-900 fill-none stroke-current" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M 20 58 Q 45 38 75 20 C 85 14 92 30 82 45 Q 76 55 68 60 C 62 65 60 50 75 36 C 88 22 102 32 98 44 C 93 55 105 34 118 38 Q 128 41 122 48 C 117 54 130 38 138 44 Q 143 48 148 38" />
+                                <circle cx="146" cy="20" r="2.5" fill="currentColor" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-bold underline text-slate-900">Yudi Maulana, M.Pd.</p>
+                            <p class="text-slate-500">NIP. 199210122023211013</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 4: SILABUS MATERI -->
+        <section id="view-materi" class="space-y-4 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Kelas X -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 card-box">
+                    <div class="flex items-center space-x-3 border-b border-slate-200 pb-3 mb-4">
+                        <div class="w-10 h-10 bg-emerald-100 text-emerald-800 rounded-lg flex items-center justify-center font-bold">X</div>
+                        <div>
+                            <h3 class="font-bold text-slate-800">Materi Fisika Kelas X (Fase E)</h3>
+                            <p class="text-xs text-slate-500">7 Alur Pembelajaran Utama (1 Tahun)</p>
+                        </div>
+                    </div>
+                    <ol class="space-y-3 text-xs">
+                        <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex items-start gap-2">
+                            <span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0">1</span>
+                            <div>
+                                <strong class="text-slate-800 block text-sm">Besaran dan Satuan</strong>
+                                <p class="text-slate-600">Pengukuran fisik, dimensi besaran, dan analisis konversi satuan internasional (SI).</p>
+                            </div>
+                        </li>
+                        <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex items-start gap-2">
+                            <span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0">2</span>
+                            <div>
+                                <strong class="text-slate-800 block text-sm">Jangka Sorong</strong>
+                                <p class="text-slate-600">Prinsip kerja, membaca skala utama & nonius, presisi $0,01 \text{ cm}$, serta praktikum.</p>
+                            </div>
+                        </li>
+                        <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex items-start gap-2">
+                            <span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0">3</span>
+                            <div>
+                                <strong class="text-slate-800 block text-sm">Mikrometer Sekrup</strong>
+                                <p class="text-slate-600">Teknik pengukuran ketebalan/diameter presisi tinggi ($0,01 \text{ mm}$), pembacaan dan perhitungan ketidakpastian.</p>
+                            </div>
+                        </li>
+                        <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex items-start gap-2">
+                            <span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0">4</span>
+                            <div>
+                                <strong class="text-slate-800 block text-sm">Besaran Pokok dan Besaran Turunan</strong>
+                                <p class="text-slate-600">Klasifikasi 7 besaran pokok, dimensi $[M][L][T]$, serta penyusunan formula besaran turunan.</p>
+                            </div>
+                        </li>
+                        <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex items-start gap-2">
+                            <span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0">5</span>
+                            <div>
+                                <strong class="text-slate-800 block text-sm">Energi Terbarukan</strong>
+                                <p class="text-slate-600">Bentuk-bentuk energi, hukum kekekalan energi, potensi energi surya, angin, air, dan biomassa.</p>
+                            </div>
+                        </li>
+                        <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex items-start gap-2">
+                            <span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0">6</span>
+                            <div>
+                                <strong class="text-slate-800 block text-sm">Pemanasan Global</strong>
+                                <p class="text-slate-600">Efek rumah kaca, dampak perubahan iklim, gas emisi karbon, dan solusi mitigasi lingkungan.</p>
+                            </div>
+                        </li>
+                        <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex items-start gap-2">
+                            <span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0">7</span>
+                            <div>
+                                <strong class="text-slate-800 block text-sm">Vektor</strong>
+                                <p class="text-slate-600">Komponen vektor, penjumlahan/pengurangan vektor (metode jajaran genjang & analitis), dan perkalian titik/silang.</p>
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+
+                <!-- Kelas XII -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 card-box">
+                    <div class="flex items-center space-x-3 border-b border-slate-200 pb-3 mb-4">
+                        <div class="w-10 h-10 bg-amber-100 text-amber-800 rounded-lg flex items-center justify-center font-bold">XII</div>
+                        <div>
+                            <h3 class="font-bold text-slate-800">Materi Fisika Kelas XII (Fase F)</h3>
+                            <p class="text-xs text-slate-500">4 Pilar Kelistrikan (1 Tahun)</p>
+                        </div>
+                    </div>
+                    <ol class="space-y-3 text-xs">
+                        <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex items-start gap-2">
+                            <span class="w-5 h-5 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0">1</span>
+                            <div>
+                                <strong class="text-slate-800 block text-sm">Listrik Arus Searah (DC)</strong>
+                                <p class="text-slate-600">Arus listrik $I = \frac{Q}{t}$, hambatan kawat $R = \rho \frac{L}{A}$, beda potensial, dan susunan seri/paralel.</p>
+                            </div>
+                        </li>
+                        <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex items-start gap-2">
+                            <span class="w-5 h-5 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0">2</span>
+                            <div>
+                                <strong class="text-slate-800 block text-sm">Hukum Ohm</strong>
+                                <p class="text-slate-600">Hubungan $V = I \cdot R$, grafik Karakteristik $V-I$, daya listrik $P = V \cdot I$, serta energi listrik.</p>
+                            </div>
+                        </li>
+                        <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex items-start gap-2">
+                            <span class="w-5 h-5 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0">3</span>
+                            <div>
+                                <strong class="text-slate-800 block text-sm">Hukum Kirchhoff</strong>
+                                <p class="text-slate-600">Hukum I Kirchhoff ($\sum I_{\text{masuk}} = \sum I_{\text{keluar}}$) dan Hukum II Kirchhoff ($\sum \mathcal{E} + \sum I \cdot R = 0$) pada rangkaian tunggal & multiloop.</p>
+                            </div>
+                        </li>
+                        <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex items-start gap-2">
+                            <span class="w-5 h-5 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0">4</span>
+                            <div>
+                                <strong class="text-slate-800 block text-sm">Listrik Statis (Electrostatics)</strong>
+                                <p class="text-slate-600">Hukum Coulomb $F = k \frac{q_1 q_2}{r^2}$, medan listrik $E$, potensial $V$, dan kapasitor keping sejajar.</p>
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- SIGNATURE BLOCK FOR PRINTING -->
+        <div class="print-only mt-12 pt-6 border-t border-slate-300">
+            <div class="flex justify-between items-end text-xs">
+                <div class="text-center w-64">
+                    <p>Mengetahui,</p>
+                    <p class="font-bold">Kepala MAN Insan Cendekia Bengkulu Tengah</p>
+                    <div class="h-12"></div>
+                    <p class="font-bold underline">Julita, M.Pd.I</p>
+                    <p>NIP. 198401302006042002</p>
+                </div>
+                <div class="text-center w-64">
+                    <p>Renah Lebar, <span id="current-date-print">20 Desember 2025</span></p>
+                    <p class="font-bold">Guru Mata Pelajaran Fisika</p>
+                    <!-- TTD DIGITAL SVG (Yudi Maulana) -->
+                    <div class="my-1">
+                        <svg viewBox="0 0 200 70" class="h-12 mx-auto text-slate-900 fill-none stroke-current" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M 20 58 Q 45 38 75 20 C 85 14 92 30 82 45 Q 76 55 68 60 C 62 65 60 50 75 36 C 88 22 102 32 98 44 C 93 55 105 34 118 38 Q 128 41 122 48 C 117 54 130 38 138 44 Q 143 48 148 38" />
+                            <circle cx="146" cy="20" r="2.5" fill="currentColor" />
+                        </svg>
+                    </div>
+                    <p class="font-bold underline">Yudi Maulana, M.Pd.</p>
+                    <p>NIP. 199210122023211013</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500 no-print mt-auto">
+        MAN Insan Cendekia Bengkulu Tengah &copy; 2025/2026 — Perangkat Pembelajaran Fisika (Guru: Yudi Maulana, M.Pd.)
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // DATA MASTER SISWA
+        const rawStudentsData = {
+            X1: [
+                { name: "AFIF ARINAL HAQ", nisn: "0103988938" },
+                { name: "AL HUSNAINI THOIBAH", nisn: "3098997480" },
+                { name: "FADHIL SYAIRAZI SUTOPO", nisn: "0101072432" },
+                { name: "MUHAMMAD FATHAN FAUZIL AZIZ", nisn: "0101986656" },
+                { name: "ZAKIA ALHANIYAH", nisn: "0097330842" },
+                { name: "FARIZAL AZIZ", nisn: "0103629309" },
+                { name: "FATTIYAH LEVIANO", nisn: "0099791787" },
+                { name: "THALITA AZ ZAHRA", nisn: "3109688097" },
+                { name: "SHOFYIA YASMINE HUMAYROH", nisn: "3105770187" },
+                { name: "HIRAR MASYA", nisn: "0102108565" },
+                { name: "ADINDA AIDILLA SYAFITRI", nisn: "0094334742" },
+                { name: "ARDINE DANISWARA MURYADIN", nisn: "0105859839" },
+                { name: "RAISSA ATHIFAH", nisn: "0106759658" },
+                { name: "RASYA PUTRAWANSYAH", nisn: "0106398097" },
+                { name: "M. ALEXA HERDIAN", nisn: "0099808940" },
+                { name: "M. SAYYID HIDAYATULLAH", nisn: "3109955221" },
+                { name: "MEISSY CALLYSTA PERMANA", nisn: "0101081182" },
+                { name: "MILLA DINA NUR ZAHRA", nisn: "3107208991" },
+                { name: "MUHAMMAD ADNAN HAFIZH S.", nisn: "0099181056" },
+                { name: "NAUFAL HABIBUR RAHMAN", nisn: "0107080526" },
+                { name: "THORIQ AL HAYYAN", nisn: "0095212570" },
+                { name: "JUNITA PUTRI CANISKA", nisn: "0108352080" },
+                { name: "BELLA PUTRI MAHARANI", nisn: "0103166780" },
+                { name: "NATASYA MULYANINGSIH", nisn: "0103085469" }
+            ],
+            X2: [
+                { name: "RIZKY AKHMAD", nisn: "3098403676" },
+                { name: "DERRY FAKHLEVIE", nisn: "0102044339" },
+                { name: "IKHSAN NURDIANTO", nisn: "0119172247" },
+                { name: "MUHAMMAD HAFID HABIBI", nisn: "3109105219" },
+                { name: "BONITA DWI ASYIFA", nisn: "0106453243" },
+                { name: "ALIFA HEFRIANI", nisn: "0108296139" },
+                { name: "INTAN AULIA PUTRI", nisn: "3101627657" },
+                { name: "SIVA ALIFIANA ZAHRA", nisn: "0103908096" },
+                { name: "OKTA WAHYU PRATIWI", nisn: "0097627918" },
+                { name: "AHIRA MUTIA RAMADHANI", nisn: "0109052498" },
+                { name: "AHMAD JAFIN FAHLEVI", nisn: "0117576139" },
+                { name: "FADLI AROYAN", nisn: "0105621421" },
+                { name: "ZATASYA NUR RAMADHANI", nisn: "0108148858" },
+                { name: "RENNAYU DESMIN PUTRI", nisn: "0101493679" },
+                { name: "AZRA LAILA MASYRIFAH", nisn: "0109405505" },
+                { name: "FIKRIYA MUZAKKI", nisn: "0106013573" },
+                { name: "M.DAFFA GALENDA HERYANTO", nisn: "0108458437" },
+                { name: "MEUTYA SABRINA", nisn: "0105449745" },
+                { name: "MUHAMMAD AHZA NUFAIL", nisn: "0104816821" },
+                { name: "RATU BUNGA CITRA PERDANA", nisn: "3100672932" },
+                { name: "SUBHAN ANUGRAH", nisn: "0106608683" },
+                { name: "TSALISA AZZAHRA", nisn: "0105293907" },
+                { name: "M. ALIF IFFATURROHMAN", nisn: "0104117726" }
+            ],
+            X3: [
+                { name: "MUHAMMAD DARREL HERMANSYAH", nisn: "0109381573" },
+                { name: "ROMY KURNIAWAN", nisn: "0101655409" },
+                { name: "SALSABILA HENDRA PUTRI", nisn: "0114658262" },
+                { name: "VIONA MAILENI RAHAYU", nisn: "0108857831" },
+                { name: "ALFINZA PRATAMA", nisn: "0096192329" },
+                { name: "RAFFI ALFAIRUS AGSA", nisn: "3104869356" },
+                { name: "FILANDO NOTO ARNANDA", nisn: "0107590882" },
+                { name: "AINUHA KAELA SURRAIYA", nisn: "0101582101" },
+                { name: "AMIRAH ZAHIRAH PRAMONO", nisn: "0108325125" },
+                { name: "CALLISTA ANDIRA FATHARANI", nisn: "0093521006" },
+                { name: "DIO RENZA OKTOVIANDI", nisn: "0117400006" },
+                { name: "FADLY YUANZA", nisn: "0101557600" },
+                { name: "IQBAL HIDAYAT", nisn: "0098031669" },
+                { name: "JECINDA HANANTRI ISKANDAR", nisn: "0107256961" },
+                { name: "AFIF LUQMAN ISKANDAR", nisn: "3109820563" },
+                { name: "FATIHATUN NISAK", nisn: "3101028825" },
+                { name: "M.KAUTSAR RIZQY", nisn: "0091446543" },
+                { name: "M. IBRAHIM", nisn: "0105007175" },
+                { name: "MUHAMMAD IQBAL GUEVARA", nisn: "0109684678" },
+                { name: "MUTIA AMBAR ERYN AL HASANAH", nisn: "0102681898" },
+                { name: "PUTI NAZHIFAH ATTHAYA", nisn: "0103190265" },
+                { name: "SYAFA NABILLA YANTRI", nisn: "0094658131" },
+                { name: "VIORAHMATIA ELIZA", nisn: "0112937838" },
+                { name: "AISYAH MEIDINA PUTRI", nisn: "0101979883" }
+            ],
+            X4: [
+                { name: "KAYSAN NAWFAL ALI", nisn: "3105845314" },
+                { name: "MUHAMAD FAIZ NUR ALAM", nisn: "0103965655" },
+                { name: "MUHAMMAD DHAFIN AZRILLAH", nisn: "0108169516" },
+                { name: "SYAHVIRA NURSYIFA", nisn: "0107417975" },
+                { name: "AIRA ANINDYA PERMATA", nisn: "0108367592" },
+                { name: "RAFIQ NAUFAL PUTRA FELONI", nisn: "0107211842" },
+                { name: "ALIN ADI SAPUTRA", nisn: "0091906364" },
+                { name: "CHICI HERLINA", nisn: "0093912368" },
+                { name: "SEPTI AZIZAH", nisn: "0106654323" },
+                { name: "M. LUTHFI FAIRUZ", nisn: "0097916251" },
+                { name: "ASYFA FADHILLA ANDRIADI", nisn: "0102549300" },
+                { name: "DIOSATRIA RABBAHUL VILLA", nisn: "3107338919" },
+                { name: "FAISHAL RAJABI ABIMANYU", nisn: "0108407245" },
+                { name: "HAFIZ AFIF AMAMI", nisn: "0116743084" },
+                { name: "WILLIAM ASSIDIK", nisn: "0109119237" },
+                { name: "WAFIQI DIAHNISSA AULIA", nisn: "0102497498" },
+                { name: "JESICHA ADELLARAFLESIA", nisn: "0105066684" },
+                { name: "CHIA PRINCES FINO", nisn: "0107209793" },
+                { name: "KANZA AMANDA", nisn: "0108868801" },
+                { name: "KHANSA HUMAIRA ADILAH", nisn: "0091715147" },
+                { name: "M. HARRY RAHMANTIO", nisn: "0109316215" },
+                { name: "MUHAMMAD RAIHAN ALFARIZI", nisn: "0104277804" },
+                { name: "MUTIARA RIZKIA SALSABIL ARIFIN", nisn: "0109008437" },
+                { name: "QUEENSHA QEILA EFENDRI", nisn: "0103346973" }
+            ],
+            X5: [
+                { name: "NAJWA AURIMA", nisn: "0108406815" },
+                { name: "FARHAN MAULANA DIWANGGA", nisn: "0097775847" },
+                { name: "KHALIF FADLAN RENDRAPATI", nisn: "0098357873" },
+                { name: "SHERIN HAFIZA", nisn: "0102158975" },
+                { name: "KHAIRA INTAN SYAHARA PULUNGAN", nisn: "0102869836" },
+                { name: "MUHAMMAD RAMZY SETIAWAN", nisn: "0102558895" },
+                { name: "RAISAH RADIFAH", nisn: "0095899970" },
+                { name: "AKHRAENY RAHAYU", nisn: "0096413070" },
+                { name: "ANDARU AZZA PRAWIRA", nisn: "0103202537" },
+                { name: "AZIZAH NASYWA IRAWAN", nisn: "0108105335" },
+                { name: "HANIF ARRIFQI", nisn: "0107067717" },
+                { name: "ZAHRA TALITA", nisn: "0108560944" },
+                { name: "AFRIL LEO ALENSKIE", nisn: "0101772575" },
+                { name: "CLARA APRILIA", nisn: "0108589047" },
+                { name: "GHEA RAMADANI", nisn: "3099581001" },
+                { name: "M. RADITYA FAIZ KHOMEINI", nisn: "0101481751" },
+                { name: "SYIFA NUR SABRINA", nisn: "3104476772" },
+                { name: "RAID ABBIYYU DZAKWAN", nisn: "0114114271" },
+                { name: "MUHAMMAD ZAKWAN HAFIZHI AHTARSI", nisn: "0102872869" },
+                { name: "MUHAMMAD FARRAAS RAMADHAN", nisn: "0102659413" },
+                { name: "MUHAMAD FIQRI FADILLAH", nisn: "0101573867" },
+                { name: "ZASKIA ALIFAH HUMAIRA", nisn: "0107578052" }
+            ],
+            XII1: [
+                { name: "RASHIYA RAMADHANI KARNAIN", nisn: "3073499079" },
+                { name: "FITRAH MUFLIH AZZANI", nisn: "0081596875" },
+                { name: "ACHMAD ZAYNNURI AKYU RAMADHAN", nisn: "3083354278" },
+                { name: "FAHRY WIRANATA SADLIR", nisn: "0082914215" },
+                { name: "MUHAMMAD GUSAN CESAR YUDHISTIRA", nisn: "0087972653" },
+                { name: "FATWA KINASIH", nisn: "0081460390" },
+                { name: "KANAYA AISYAH WIDYANA", nisn: "0088641273" },
+                { name: "SHYFA INTAN REISHA", nisn: "0072059526" },
+                { name: "NURLITA SALLSABILA", nisn: "0085135311" },
+                { name: "ZAKIAH KEISHA FATIHATUN NISA", nisn: "0072114432" },
+                { name: "AULIA NABILA MAULIDAH", nisn: "3082328061" },
+                { name: "NAURA UMAIRAH LESSADI", nisn: "0076041053" },
+                { name: "SARAH AS-SHOFIAH", nisn: "0082728968" },
+                { name: "PRADJNAPARAMITHA RAKAY DIYA AL DIN", nisn: "3086842992" },
+                { name: "EKA FATHUR RAHMAN ASMADI", nisn: "0082702733" }
+            ],
+            XII2: [
+                { name: "FITRA YULIA WARMAN", nisn: "0082511777" },
+                { name: "NAILA FARAH AZZURA", nisn: "0071736659" },
+                { name: "SABRINA NUGRAHENI", nisn: "0075280261" },
+                { name: "KHANSA NABILAH R.K", nisn: "0098587419" },
+                { name: "AULIA ZAHRA ANDINI", nisn: "0089337137" },
+                { name: "EOLIA EKA NUR WIDYASARI", nisn: "0076265051" },
+                { name: "NURMAN AZIS", nisn: "0083190263" },
+                { name: "FAREL ZAIDAN LUTHFI", nisn: "0085057063" },
+                { name: "ZAHIRA NUR FADHILAH", nisn: "0087134172" },
+                { name: "QIBTYAH ANDRY MUBARA", nisn: "0089060400" },
+                { name: "SOFYY MARDIYAH", nisn: "0075202513" },
+                { name: "IRSYAD HAZIMUL FIKRI", nisn: "0089174686" },
+                { name: "MUHAMMAD KAYSAN HAMDI", nisn: "0088726733" },
+                { name: "ARTIKA TRI RAHMAYANTI", nisn: "0085222916" }
+            ],
+            XII3: [
+                { name: "DIARA AZZRATUS SYITA", nisn: "0089508058" },
+                { name: "NOKEN DJATI UTOMO", nisn: "0075612093" },
+                { name: "LUTHFIYANAH ULFAH TSABITAH", nisn: "0097005785" },
+                { name: "SYAHRUL AHMAD MUCHLISIN", nisn: "0077999278" },
+                { name: "ANNISA KHAIRANI", nisn: "0088930685" },
+                { name: "FARAHI AKBAR FAJRI", nisn: "0084478157" },
+                { name: "MHD. HAFIZH OKTAFIAN", nisn: "0074449197" },
+                { name: "KEMAL SHIDQI ANANDEVHAN", nisn: "0081915158" },
+                { name: "ACHMAD RAFI PRATAMA", nisn: "0088229116" },
+                { name: "RHAKEZ ELVANO STONIE", nisn: "0074264026" },
+                { name: "M. DAKSA DIRGA ARKANANTA", nisn: "0081195730" },
+                { name: "FAIZAH RAFA INAYA", nisn: "0072074133" },
+                { name: "MUHAMMAD FERI IRFANSYAH", nisn: "0075547491" },
+                { name: "BAGINDA SANTANA ZAPASLE", nisn: "0083324189" },
+                { name: "M. NAUFAL WAHYUDI", nisn: "0089943440" }
+            ],
+            XII4: [
+                { name: "MUHAMMAD LUTHFI ROZIN HIDAYAT", nisn: "0079574729" },
+                { name: "LUTHFI AINURRAFIQ AL-AZIZI", nisn: "0082406837" },
+                { name: "SHAFA FADILAH WIBISONO", nisn: "0092535295" },
+                { name: "NAJMU HAYAT AR-ROBI'", nisn: "0082084688" },
+                { name: "MUHAMMAD ALIF ALFITHO", nisn: "0071540773" },
+                { name: "INTANIA SHOFIA RAMADHANI", nisn: "0077262072" },
+                { name: "YUDHIT ADI WASKITO WIDIANTO", nisn: "0076318460" },
+                { name: "DEAN KHAYRAN WAFA", nisn: "0081226088" },
+                { name: "MUHAMMAD THOHARI HAMKA", nisn: "0082228899" },
+                { name: "AFIFAH EL ZAHRA", nisn: "0082165417" },
+                { name: "CHRISNA DHARMAKERTA RAMADHAN", nisn: "0081843657" },
+                { name: "AURELIA NATASYA", nisn: "0077039234" },
+                { name: "REFAN HUDA MAHESWARA", nisn: "0082404285" }
+            ],
+            XII5: [
+                { name: "SULTAN SALAHUDIN AL AYUBI", nisn: "0082186680" },
+                { name: "ASKIA FARWIZAH", nisn: "0084175796" },
+                { name: "DEVO YUAL ROISFIWA", nisn: "0084632813" },
+                { name: "MUHAMMAD ARYA SUTA", nisn: "0081942258" },
+                { name: "FADHILAH AFDHANSYAH", nisn: "0088900053" },
+                { name: "ATIQAH ROYYANY EL-RIZALY", nisn: "3089205398" },
+                { name: "AULIYA ASSYIFA", nisn: "0081195365" },
+                { name: "AIKA HASNA", nisn: "0086046288" },
+                { name: "ZAHRA ARIQAH FATIN", nisn: "0089141086" },
+                { name: "MUHAMMAD AL AFIF", nisn: "0089986708" },
+                { name: "ZAHRA AJENG ALHAFIZA", nisn: "0081387889" },
+                { name: "SALWA MUWAFIEQOTUL ULA", nisn: "0089460976" },
+                { name: "KAISA FAUZIYAH", nisn: "0087627445" },
+                { name: "ANANDA ANUGRAH PRATAMA", nisn: "0088064610" },
+                { name: "CETTO UNTARA BUWANA", nisn: "0083185347" },
+                { name: "CHAIRUNNISA RAMADHANI", nisn: "0075983057" }
+            ],
+            XII6: [
+                { name: "CATHELINA AURORA ZAHIRA", nisn: "0076489996" },
+                { name: "ATIZA NURIA MAULIDA", nisn: "0082538943" },
+                { name: "MUHAMMAD ZAKI SHIDDIQ", nisn: "0087054980" },
+                { name: "NAJAH AFTA NAFISA", nisn: "0076242576" },
+                { name: "NAUFAL FACHRI AZIZ", nisn: "0077963315" },
+                { name: "RAJENDRA FAKHRI CHANIAGO", nisn: "0088349523" },
+                { name: "M. ZAKI DIQAH PRATAMA", nisn: "0083362525" },
+                { name: "NAYLA CHINTYATARI", nisn: "3091571602" },
+                { name: "NAZHIFAH KHAIRUNNISA", nisn: "0081101321" },
+                { name: "DIANDRA VRISCHA PRAMANDITA", nisn: "0086187698" },
+                { name: "NURKAMILA ADINDA RABBANI", nisn: "0089488169" },
+                { name: "KHAIRUNNISA NAFIZATUL FITRI", nisn: "0087560258" },
+                { name: "ADRINA ALTHAFUNNISA", nisn: "0081128115" },
+                { name: "MUHAMMAD FACHRI YEDISTA", nisn: "0071325254" }
+            ]
+        };
+
+        // MATERI MASTER
+        const materiMap = {
+            X: [
+                "Besaran dan Satuan",
+                "Jangka Sorong",
+                "Mikrometer Sekrup",
+                "Besaran Pokok & Turunan",
+                "Energi Terbarukan",
+                "Pemanasan Global",
+                "Vektor"
+            ],
+            XII: [
+                "Listrik Arus Searah (DC)",
+                "Hukum Ohm & Daya Listrik",
+                "Hukum Kirchhoff (I & II)",
+                "Listrik Statis & Kapasitor"
+            ]
+        };
+
+        // DATES FOR EFEKTIF SEMESTER (GANJIL & GENAP)
+        const datesGanjil = [
+            "04/08/25", "11/08/25", "18/08/25", "25/08/25",
+            "01/09/25", "08/09/25", "15/09/25", "22/09/25", "29/09/25",
+            "06/10/25", "13/10/25", "20/10/25", "27/10/25",
+            "03/11/25", "10/11/25", "17/11/25", "24/11/25", "01/12/25"
+        ];
+
+        const datesGenap = [
+            "05/01/26", "12/01/26", "19/01/26", "26/01/26",
+            "02/02/26", "09/02/26", "16/02/26", "23/02/26",
+            "02/03/26", "09/03/26", "16/03/26", "23/03/26", "30/03/26",
+            "06/04/26", "13/04/26", "20/04/26", "27/04/26", "04/05/26"
+        ];
+
+        // GLOBAL APP STATE
+        let currentClass = "X1";
+        let currentSemester = "Ganjil";
+        let currentTab = "absen";
+        let db = {};
+
+        // INITIALIZE APP
+        function initApp() {
+            const saved = localStorage.getItem('fisika_app_db_v1');
+            if (saved) {
+                try {
+                    db = JSON.parse(saved);
+                } catch(e) {
+                    initDefaultData();
+                }
+            } else {
+                initDefaultData();
+            }
+
+            renderAll();
+        }
+
+        // INIT DEFAULT STRUCTURE & DUMMY VALUES
+        function initDefaultData() {
+            db = {};
+            const classKeys = Object.keys(rawStudentsData);
+            const semesters = ["Ganjil", "Genap"];
+
+            classKeys.forEach(cls => {
+                db[cls] = {};
+                semesters.forEach(sem => {
+                    const isX = cls.startsWith("X");
+                    const materiList = isX ? materiMap.X : materiMap.XII;
+                    const students = rawStudentsData[cls];
+                    const dates = sem === "Ganjil" ? datesGanjil : datesGenap;
+
+                    // 1. Absensi Data
+                    const attendance = {};
+                    students.forEach(s => {
+                        attendance[s.nisn] = Array(18).fill("H");
+                    });
+
+                    // 2. Jurnal Data
+                    const jurnal = dates.map((dt, idx) => {
+                        const matIdx = idx % materiList.length;
+                        return {
+                            pert: idx + 1,
+                            date: dt,
+                            materi: materiList[matIdx],
+                            tp: `Memahami konsep ${materiList[matIdx]} dan penerapannya dalam kehidupan sehari-hari`,
+                            activity: "Diskusi kelompok, pemaparan konsep, praktikum sederhana, dan latihan soal terintegrasi",
+                            presence: "Lengkap",
+                            note: "Kondisi pembelajaran kondusif"
+                        };
+                    });
+
+                    // 3. Nilai Data
+                    const grades = {};
+                    students.forEach((s, i) => {
+                        // Generate realistic dummy scores
+                        const base = 80 + (i % 12);
+                        grades[s.nisn] = {
+                            tp1: Math.min(100, base + 2),
+                            tp2: Math.min(100, base - 1),
+                            tp3: Math.min(100, base + 4),
+                            tp4: Math.min(100, base),
+                            uh1: Math.min(100, base + 1),
+                            uh2: Math.min(100, base - 3),
+                            uh3: Math.min(100, base + 3),
+                            pts: Math.min(100, base),
+                            pas: Math.min(100, base + 2)
+                        };
+                    });
+
+                    db[cls][sem] = {
+                        attendance,
+                        jurnal,
+                        grades
+                    };
+                });
+            });
+
+            saveDataToLocal();
+        }
+
+        function saveDataToLocal() {
+            localStorage.setItem('fisika_app_db_v1', JSON.stringify(db));
+            showToast("Data berhasil disimpan ke memori lokal browser!");
+        }
+
+        function resetToDefaultData() {
+            if (confirm("Apakah Anda yakin ingin mengembalikan semua data absensi, jurnal, dan nilai ke setelan awal?")) {
+                localStorage.removeItem('fisika_app_db_v1');
+                initDefaultData();
+                renderAll();
+                showToast("Data berhasil di-reset ke data bawaan!");
+            }
+        }
+
+        // UI SWITCHERS
+        function switchClass(val) {
+            currentClass = val;
+            renderAll();
+        }
+
+        function switchSemester(val) {
+            currentSemester = val;
+            renderAll();
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            ['absen', 'jurnal', 'nilai', 'materi'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`tab-${t}`);
+                btn.className = "px-4 py-1.5 rounded-md text-xs font-bold text-slate-600 hover:text-slate-900 transition";
+            });
+
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tab}`);
+            activeBtn.className = "px-4 py-1.5 rounded-md text-xs font-bold transition text-emerald-800 bg-white shadow-sm";
+        }
+
+        // RENDER LOGIC
+        function renderAll() {
+            updateInfoBadge();
+            renderAbsenTable();
+            renderJurnalTable();
+            renderNilaiTable();
+        }
+
+        function updateInfoBadge() {
+            const classTitle = currentClass.startsWith("X") && currentClass.length === 2 ? `Kelas ${currentClass}` : `Kelas ${currentClass.replace('XII', 'XII ')}`;
+            const students = rawStudentsData[currentClass] || [];
+
+            document.getElementById('class-badge').innerText = currentClass.replace('XII', 'XII-');
+            document.getElementById('class-title').innerText = `${classTitle} — Fisika (${currentSemester})`;
+            document.getElementById('stat-siswa').innerText = `${students.length} Siswa`;
+            document.getElementById('print-class-info').innerText = `KELAS: ${classTitle.toUpperCase()}`;
+
+            // Update Dynamic End of Semester Dates and Labels
+            const semEndDate = currentSemester === "Ganjil" ? "20 Desember 2025" : "20 Juni 2026";
+            
+            document.querySelectorAll('.semester-label-text').forEach(el => {
+                el.innerText = `Semester ${currentSemester}`;
+            });
+            document.querySelectorAll('.semester-end-date').forEach(el => {
+                el.innerText = semEndDate;
+            });
+            const printDateEl = document.getElementById('current-date-print');
+            if (printDateEl) printDateEl.innerText = semEndDate;
+
+            const isX = currentClass.startsWith("X");
+            document.getElementById('materi-summary').innerText = isX 
+                ? "Materi Pokok: Besaran & Satuan, Jangka Sorong, Mikrometer Sekrup, Besaran Pokok/Turunan, Energi Terbarukan, Pemanasan Global, Vektor"
+                : "Materi Pokok: Listrik Arus Searah (DC), Hukum Ohm, Hukum Kirchhoff, Listrik Statis";
+        }
+
+        // 1. RENDER ABSEN
+        function renderAbsenTable() {
+            const tbody = document.getElementById('absen-table-body');
+            tbody.innerHTML = '';
+
+            const students = rawStudentsData[currentClass] || [];
+            const attData = db[currentClass]?.[currentSemester]?.attendance || {};
+
+            students.forEach((s, idx) => {
+                const sAtt = attData[s.nisn] || Array(18).fill("H");
+                
+                let countH = 0, countS = 0, countI = 0, countA = 0;
+                sAtt.forEach(st => {
+                    if (st === 'H') countH++;
+                    if (st === 'S') countS++;
+                    if (st === 'I') countI++;
+                    if (st === 'A') countA++;
+                });
+
+                const pct = Math.round((countH / 18) * 100);
+
+                let colsHtml = '';
+                sAtt.forEach((st, pIdx) => {
+                    let colorClass = "text-emerald-700 bg-emerald-50";
+                    if (st === 'S') colorClass = "text-blue-700 bg-blue-50 font-bold";
+                    if (st === 'I') colorClass = "text-amber-700 bg-amber-50 font-bold";
+                    if (st === 'A') colorClass = "text-red-700 bg-red-100 font-black";
+
+                    colsHtml += `
+                        <td class="p-1 text-center border-r border-slate-200 cursor-pointer hover:bg-slate-200 transition ${colorClass}" 
+                            onclick="toggleAbsen('${s.nisn}', ${pIdx})">
+                            ${st}
+                        </td>
+                    `;
+                });
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-2 text-center border-r border-slate-200 font-semibold">${idx + 1}</td>
+                    <td class="p-2 border-r border-slate-200 font-mono text-[11px] text-slate-600">${s.nisn}</td>
+                    <td class="p-2 border-r border-slate-200 font-bold text-slate-800">${s.name}</td>
+                    ${colsHtml}
+                    <td class="p-2 text-center border-r border-slate-200 bg-emerald-50 font-bold text-emerald-800">${countH}</td>
+                    <td class="p-2 text-center border-r border-slate-200 bg-blue-50 font-bold text-blue-800">${countS}</td>
+                    <td class="p-2 text-center border-r border-slate-200 bg-amber-50 font-bold text-amber-800">${countI}</td>
+                    <td class="p-2 text-center border-r border-slate-200 bg-red-50 font-bold text-red-800">${countA}</td>
+                    <td class="p-2 text-center bg-slate-100 font-bold ${pct < 80 ? 'text-red-600' : 'text-slate-800'}">${pct}%</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function toggleAbsen(nisn, pIdx) {
+            const states = ['H', 'S', 'I', 'A'];
+            const current = db[currentClass][currentSemester].attendance[nisn][pIdx];
+            const nextIdx = (states.indexOf(current) + 1) % states.length;
+            db[currentClass][currentSemester].attendance[nisn][pIdx] = states[nextIdx];
+            renderAbsenTable();
+        }
+
+        function markAllHadir() {
+            const students = rawStudentsData[currentClass] || [];
+            students.forEach(s => {
+                db[currentClass][currentSemester].attendance[s.nisn] = Array(18).fill("H");
+            });
+            renderAbsenTable();
+            showToast("Semua siswa ditandai HADIR untuk semester ini.");
+        }
+
+        // 2. RENDER JURNAL
+        function renderJurnalTable() {
+            const tbody = document.getElementById('jurnal-table-body');
+            tbody.innerHTML = '';
+
+            const jurnalList = db[currentClass]?.[currentSemester]?.jurnal || [];
+
+            jurnalList.forEach((j, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-2 text-center border-r border-slate-200 font-bold bg-slate-50">${j.pert}</td>
+                    <td class="p-1 border-r border-slate-200">
+                        <input type="text" value="${j.date}" onchange="updateJurnal(${idx}, 'date', this.value)" class="w-full bg-transparent p-1 font-semibold text-slate-800 border border-transparent hover:border-slate-300 focus:border-emerald-500 rounded text-xs">
+                    </td>
+                    <td class="p-1 border-r border-slate-200">
+                        <input type="text" value="${j.materi}" onchange="updateJurnal(${idx}, 'materi', this.value)" class="w-full bg-transparent p-1 font-bold text-emerald-900 border border-transparent hover:border-slate-300 focus:border-emerald-500 rounded text-xs">
+                    </td>
+                    <td class="p-1 border-r border-slate-200">
+                        <textarea onchange="updateJurnal(${idx}, 'tp', this.value)" rows="2" class="w-full bg-transparent p-1 text-slate-700 border border-transparent hover:border-slate-300 focus:border-emerald-500 rounded text-xs resize-none">${j.tp}</textarea>
+                    </td>
+                    <td class="p-1 border-r border-slate-200">
+                        <textarea onchange="updateJurnal(${idx}, 'activity', this.value)" rows="2" class="w-full bg-transparent p-1 text-slate-700 border border-transparent hover:border-slate-300 focus:border-emerald-500 rounded text-xs resize-none">${j.activity}</textarea>
+                    </td>
+                    <td class="p-1 border-r border-slate-200 text-center">
+                        <input type="text" value="${j.presence}" onchange="updateJurnal(${idx}, 'presence', this.value)" class="w-full text-center bg-transparent p-1 font-semibold text-slate-800 border border-transparent hover:border-slate-300 focus:border-emerald-500 rounded text-xs">
+                    </td>
+                    <td class="p-1 border-r border-slate-200">
+                        <input type="text" value="${j.note}" onchange="updateJurnal(${idx}, 'note', this.value)" class="w-full bg-transparent p-1 text-slate-600 border border-transparent hover:border-slate-300 focus:border-emerald-500 rounded text-xs">
+                    </td>
+                    <td class="p-2 text-center no-print">
+                        <button onclick="deleteJurnalRow(${idx})" class="text-red-500 hover:text-red-700 p-1">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateJurnal(idx, field, val) {
+            db[currentClass][currentSemester].jurnal[idx][field] = val;
+        }
+
+        function addJurnalRow() {
+            const list = db[currentClass][currentSemester].jurnal;
+            const newPert = list.length + 1;
+            const isX = currentClass.startsWith("X");
+            const mList = isX ? materiMap.X : materiMap.XII;
+
+            list.push({
+                pert: newPert,
+                date: "00/00/2025",
+                materi: mList[(newPert - 1) % mList.length],
+                tp: "Tujuan Pembelajaran Tambahan",
+                activity: "Diskusi & Pemecahan Masalah Fisika",
+                presence: "Lengkap",
+                note: "-"
+            });
+            renderJurnalTable();
+        }
+
+        function deleteJurnalRow(idx) {
+            if (confirm("Hapus baris jurnal ini?")) {
+                db[currentClass][currentSemester].jurnal.splice(idx, 1);
+                renderJurnalTable();
+            }
+        }
+
+        // 3. RENDER NILAI
+        function renderNilaiTable() {
+            const tbody = document.getElementById('nilai-table-body');
+            tbody.innerHTML = '';
+
+            const students = rawStudentsData[currentClass] || [];
+            const gradesData = db[currentClass]?.[currentSemester]?.grades || {};
+
+            students.forEach((s, idx) => {
+                const g = gradesData[s.nisn] || { tp1: 80, tp2: 80, tp3: 80, tp4: 80, uh1: 80, uh2: 80, uh3: 80, pts: 80, pas: 80 };
+
+                // Formula Nilai Akhir (NA): 30% Formatif + 30% UH + 20% PTS + 20% PAS
+                const avgTP = (g.tp1 + g.tp2 + g.tp3 + g.tp4) / 4;
+                const avgUH = (g.uh1 + g.uh2 + g.uh3) / 3;
+                const na = Math.round((avgTP * 0.3) + (avgUH * 0.3) + (g.pts * 0.2) + (g.pas * 0.2));
+
+                let predikat = "B";
+                if (na >= 90) predikat = "A";
+                else if (na >= 80) predikat = "B";
+                else if (na >= 75) predikat = "C";
+                else predikat = "D";
+
+                const ket = na >= 75 ? "<span class='text-emerald-600 font-bold'>Tuntas</span>" : "<span class='text-red-600 font-bold'>Remidial</span>";
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-2 text-center border-r border-slate-200 font-semibold">${idx + 1}</td>
+                    <td class="p-2 border-r border-slate-200 font-mono text-[11px] text-slate-600">${s.nisn}</td>
+                    <td class="p-2 border-r border-slate-200 font-bold text-slate-800">${s.name}</td>
+                    
+                    <!-- Formatif -->
+                    <td class="p-1 border-r border-slate-200"><input type="number" value="${g.tp1}" onchange="updateGrade('${s.nisn}', 'tp1', this.value)" class="w-full text-center bg-transparent font-medium text-slate-800"></td>
+                    <td class="p-1 border-r border-slate-200"><input type="number" value="${g.tp2}" onchange="updateGrade('${s.nisn}', 'tp2', this.value)" class="w-full text-center bg-transparent font-medium text-slate-800"></td>
+                    <td class="p-1 border-r border-slate-200"><input type="number" value="${g.tp3}" onchange="updateGrade('${s.nisn}', 'tp3', this.value)" class="w-full text-center bg-transparent font-medium text-slate-800"></td>
+                    <td class="p-1 border-r border-slate-200"><input type="number" value="${g.tp4}" onchange="updateGrade('${s.nisn}', 'tp4', this.value)" class="w-full text-center bg-transparent font-medium text-slate-800"></td>
+                    
+                    <!-- UH -->
+                    <td class="p-1 border-r border-slate-200"><input type="number" value="${g.uh1}" onchange="updateGrade('${s.nisn}', 'uh1', this.value)" class="w-full text-center bg-transparent font-medium text-slate-800"></td>
+                    <td class="p-1 border-r border-slate-200"><input type="number" value="${g.uh2}" onchange="updateGrade('${s.nisn}', 'uh2', this.value)" class="w-full text-center bg-transparent font-medium text-slate-800"></td>
+                    <td class="p-1 border-r border-slate-200"><input type="number" value="${g.uh3}" onchange="updateGrade('${s.nisn}', 'uh3', this.value)" class="w-full text-center bg-transparent font-medium text-slate-800"></td>
+                    
+                    <!-- PTS & PAS -->
+                    <td class="p-1 border-r border-slate-200 bg-amber-50/50"><input type="number" value="${g.pts}" onchange="updateGrade('${s.nisn}', 'pts', this.value)" class="w-full text-center bg-transparent font-bold text-amber-900"></td>
+                    <td class="p-1 border-r border-slate-200 bg-purple-50/50"><input type="number" value="${g.pas}" onchange="updateGrade('${s.nisn}', 'pas', this.value)" class="w-full text-center bg-transparent font-bold text-purple-900"></td>
+                    
+                    <!-- SUMMARY -->
+                    <td class="p-2 text-center border-r border-slate-200 bg-slate-800 text-white font-black text-sm">${na}</td>
+                    <td class="p-2 text-center border-r border-slate-200 font-bold text-slate-800">${predikat}</td>
+                    <td class="p-2 text-center">${ket}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateGrade(nisn, field, val) {
+            const num = Math.max(0, Math.min(100, parseInt(val) || 0));
+            db[currentClass][currentSemester].grades[nisn][field] = num;
+            renderNilaiTable();
+        }
+
+        // UTILITY TOAST
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-2.5 rounded-lg shadow-xl text-xs font-semibold z-50 flex items-center gap-2 border border-slate-700";
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> ${msg}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ON LOAD
+        window.onload = initApp;
+    </script>
+</body>
+</html>
